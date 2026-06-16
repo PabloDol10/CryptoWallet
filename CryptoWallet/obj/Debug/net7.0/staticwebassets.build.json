@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "Hash": "NFzsf8a/vQ2N3ZFRLzmg9jVDbDbzr3YI2kmFUX0Nzts=",
+  "Source": "CryptoWallet",
+  "BasePath": "_content/CryptoWallet",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "CryptoWallet/wwwroot",
+      "Source": "CryptoWallet",
+      "ContentRoot": "/Users/pablodol/CryptoWallet/CryptoWallet/wwwroot/",
+      "BasePath": "_content/CryptoWallet",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Users/pablodol/CryptoWallet/CryptoWallet/wwwroot/index.html",
+      "SourceId": "CryptoWallet",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/pablodol/CryptoWallet/CryptoWallet/wwwroot/",
+      "BasePath": "_content/CryptoWallet",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/index.html"
+    }
+  ]
+}

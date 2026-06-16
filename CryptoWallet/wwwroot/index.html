@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoWallet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; }
+        nav { background: #16213e; padding: 15px 30px; display: flex; gap: 20px; align-items: center; }
+        nav h1 { color: #e94560; margin-right: 30px; }
+        nav button { background: none; border: 1px solid #e94560; color: #eee; padding: 8px 16px; cursor: pointer; border-radius: 5px; }
+        nav button:hover, nav button.active { background: #e94560; }
+        .page { display: none; padding: 30px; max-width: 900px; margin: 0 auto; }
+        .page.active { display: block; }
+        h2 { margin-bottom: 20px; color: #e94560; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; background: #16213e; border: 1px solid #444; color: #eee; border-radius: 5px; }
+        .btn { background: #e94560; border: none; color: white; padding: 10px 20px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+        .btn:hover { background: #c73652; }
+        .btn-secondary { background: #444; margin-left: 10px; }
+        .btn-danger { background: #c0392b; margin-left: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
+        th { background: #16213e; color: #e94560; }
+        tr:hover { background: #16213e; }
+        .mensaje { padding: 10px; border-radius: 5px; margin-top: 15px; }
+        .ok { background: #1e7e34; }
+        .error { background: #c0392b; }
+        .card { background: #16213e; padding: 20px; border-radius: 8px; margin-bottom: 15px; }
+        .total { font-size: 1.3em; font-weight: bold; color: #e94560; margin-top: 20px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; }
+        .modal.active { display:flex; }
+        .modal-box { background:#16213e; padding:30px; border-radius:8px; text-align:center; }
+        .modal-box p { margin-bottom:20px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <h1>💰 CryptoWallet</h1>
+    <button onclick="mostrarPagina('transaccion')" class="active" id="btn-transaccion">Nueva Transacción</button>
+    <button onclick="mostrarPagina('historial')" id="btn-historial">Historial</button>
+    <button onclick="mostrarPagina('analisis')" id="btn-analisis">Análisis</button>
+</nav>
+
+<div class="page active" id="page-transaccion">
+    <h2>Nueva Transacción</h2>
+    <div class="form-group">
+        <label>Tipo</label>
+        <select id="action">
+            <option value="purchase">Compra</option>
+            <option value="sale">Venta</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Criptomoneda</label>
+        <select id="crypto_code">
+            <option value="btc">Bitcoin (BTC)</option>
+            <option value="eth">Ethereum (ETH)</option>
+            <option value="usdc">USDC</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Cantidad</label>
+        <input type="number" id="crypto_amount" step="0.00001" placeholder="Ej: 0.00070">
+    </div>
+    <div class="form-group">
+        <label>Fecha y hora</label>
+        <input type="datetime-local" id="datetime">
+    </div>
+    <button class="btn" onclick="crearTransaccion()">Guardar</button>
+    <div id="msg-transaccion" class="mensaje" style="display:none"></div>
+</div>
+
+<div class="page" id="page-historial">
+    <h2>Historial de Movimientos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Cripto</th>
+                <th>Cantidad</th>
+                <th>Monto (ARS)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-historial"></tbody>
+    </table>
+</div>
+
+<div class="page" id="page-analisis">
+    <h2>Estado de mi Cartera</h2>
+    <div id="cartera-contenido"></div>
+</div>
+
+<div class="modal" id="modal-borrar">
+    <div class="modal-box">
+        <p>¿Estás seguro que querés borrar esta transacción?</p>
+        <button class="btn" onclick="confirmarBorrar()">Sí, borrar</button>
+        <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+    </div>
+</div>
+
+<div class="modal" id="modal-editar">
+    <div class="modal-box" style="min-width:350px">
+        <h2 id="modal-titulo">Ver Transacción</h2>
+        <div class="form-group">
+            <label>Tipo</label>
+            <select id="edit-action">
+                <option value="purchase">Compra</option>
+                <option value="sale">Venta</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Criptomoneda</label>
+            <select id="edit-crypto">
+                <option value="btc">Bitcoin (BTC)</option>
+                <option value="eth">Ethereum (ETH)</option>
+                <option value="usdc">USDC</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Cantidad</label>
+            <input type="number" id="edit-amount" step="0.00001">
+        </div>
+        <div class="form-group">
+            <label>Monto (ARS)</label>
+            <input type="number" id="edit-money">
+        </div>
+        <div class="form-group">
+            <label>Fecha y hora</label>
+            <input type="datetime-local" id="edit-datetime">
+        </div>
+        <div id="edit-botones">
+            <button class="btn" onclick="guardarEdicion()">Guardar</button>
+            <button class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:5063';
+    let idABorrar = null;
+    let idEditando = null;
+
+    function mostrarPagina(nombre) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('page-' + nombre).classList.add('active');
+        document.getElementById('btn-' + nombre).classList.add('active');
+        if (nombre === 'historial') cargarHistorial();
+        if (nombre === 'analisis') cargarAnalisis();
+    }
+
+    async function crearTransaccion() {
+        const action = document.getElementById('action').value;
+        const crypto_code = document.getElementById('crypto_code').value;
+        const crypto_amount = parseFloat(document.getElementById('crypto_amount').value);
+        const datetime = document.getElementById('datetime').value;
+        const msg = document.getElementById('msg-transaccion');
+
+        if (!crypto_amount || crypto_amount <= 0) {
+            mostrarMensaje(msg, 'La cantidad debe ser mayor a 0.', false);
+            return;
+        }
+        if (!datetime) {
+            mostrarMensaje(msg, 'Ingresá la fecha y hora.', false);
+            return;
+        }
+
+        const res = await fetch(`${API}/transactions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action, cryptoCode: crypto_code, cryptoAmount: crypto_amount, dateTime: new Date(datetime).toISOString() })
+        });
+
+        if (res.ok) {
+            mostrarMensaje(msg, 'Transacción guardada correctamente.', true);
+            document.getElementById('crypto_amount').value = '';
+            document.getElementById('datetime').value = '';
+        } else {
+            const err = await res.text();
+            mostrarMensaje(msg, err, false);
+        }
+    }
+
+    async function cargarHistorial() {
+        const res = await fetch(`${API}/transactions`);
+        const data = await res.json();
+        const tbody = document.getElementById('tabla-historial');
+        tbody.innerHTML = '';
+        data.forEach(t => {
+            const fecha = new Date(t.dateTime).toLocaleString('es-AR');
+            const tipo = t.action === 'purchase' ? '🟢 Compra' : '🔴 Venta';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${fecha}</td>
+                    <td>${tipo}</td>
+                    <td>${t.cryptoCode.toUpperCase()}</td>
+                    <td>${t.cryptoAmount}</td>
+                    <td>$${t.money.toLocaleString('es-AR')}</td>
+                    <td>
+                        <button class="btn" onclick="verTransaccion(${t.id})">Ver</button>
+                        <button class="btn btn-secondary" onclick="editarTransaccion(${t.id})">Editar</button>
+                        <button class="btn btn-danger" onclick="abrirModalBorrar(${t.id})">Borrar</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    async function cargarAnalisis() {
+        const res = await fetch(`${API}/transactions/analysis`);
+        const data = await res.json();
+        const contenido = document.getElementById('cartera-contenido');
+        contenido.innerHTML = '';
+        if (data.cartera.length === 0) {
+            contenido.innerHTML = '<p>No tenés criptomonedas en tu cartera.</p>';
+            return;
+        }
+        data.cartera.forEach(c => {
+            contenido.innerHTML += `
+                <div class="card">
+                    <h3>${c.crypto_code.toUpperCase()}</h3>
+                    <p>Cantidad: ${c.cantidad}</p>
+                    <p>Valor actual: $${c.dinero.toLocaleString('es-AR')}</p>
+                </div>`;
+        });
+        contenido.innerHTML += `<p class="total">Total: $${data.total.toLocaleString('es-AR')}</p>`;
+    }
+
+    async function verTransaccion(id) {
+        const res = await fetch(`${API}/transactions/${id}`);
+        const t = await res.json();
+        document.getElementById('modal-titulo').textContent = 'Ver Transacción';
+        document.getElementById('edit-action').value = t.action;
+        document.getElementById('edit-action').disabled = true;
+        document.getElementById('edit-crypto').value = t.cryptoCode;
+        document.getElementById('edit-crypto').disabled = true;
+        document.getElementById('edit-amount').value = t.cryptoAmount;
+        document.getElementById('edit-amount').disabled = true;
+        document.getElementById('edit-money').value = t.money;
+        document.getElementById('edit-money').disabled = true;
+        document.getElementById('edit-datetime').value = t.dateTime.slice(0,16);
+        document.getElementById('edit-datetime').disabled = true;
+        document.getElementById('edit-botones').innerHTML = `<button class="btn btn-secondary" onclick="cerrarModalEditar()">Cerrar</button>`;
+        document.getElementById('modal-editar').classList.add('active');
+    }
+
+    async function editarTransaccion(id) {
+        const res = await fetch(`${API}/transactions/${id}`);
+        const t = await res.json();
+        idEditando = id;
+        document.getElementById('modal-titulo').textContent = 'Editar Transacción';
+        document.getElementById('edit-action').value = t.action;
+        document.getElementById('edit-action').disabled = false;
+        document.getElementById('edit-crypto').value = t.cryptoCode;
+        document.getElementById('edit-crypto').disabled = false;
+        document.getElementById('edit-amount').value = t.cryptoAmount;
+        document.getElementById('edit-amount').disabled = false;
+        document.getElementById('edit-money').value = t.money;
+        document.getElementById('edit-money').disabled = false;
+        document.getElementById('edit-datetime').value = t.dateTime.slice(0,16);
+        document.getElementById('edit-datetime').disabled = false;
+        document.getElementById('edit-botones').innerHTML = `
+            <button class="btn" onclick="guardarEdicion()">Guardar</button>
+            <button class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>`;
+        document.getElementById('modal-editar').classList.add('active');
+    }
+
+    async function guardarEdicion() {
+        const body = {
+            action: document.getElementById('edit-action').value,
+            cryptoCode: document.getElementById('edit-crypto').value,
+            cryptoAmount: parseFloat(document.getElementById('edit-amount').value),
+            money: parseFloat(document.getElementById('edit-money').value),
+            dateTime: document.getElementById('edit-datetime').value
+        };
+        await fetch(`${API}/transactions/${idEditando}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        cerrarModalEditar();
+        cargarHistorial();
+    }
+
+    function abrirModalBorrar(id) {
+        idABorrar = id;
+        document.getElementById('modal-borrar').classList.add('active');
+    }
+
+    async function confirmarBorrar() {
+        await fetch(`${API}/transactions/${idABorrar}`, { method: 'DELETE' });
+        cerrarModal();
+        cargarHistorial();
+    }
+
+    function cerrarModal() {
+        document.getElementById('modal-borrar').classList.remove('active');
+        idABorrar = null;
+    }
+
+    function cerrarModalEditar() {
+        document.getElementById('modal-editar').classList.remove('active');
+        idEditando = null;
+    }
+
+    function mostrarMensaje(el, texto, ok) {
+        el.textContent = texto;
+        el.className = 'mensaje ' + (ok ? 'ok' : 'error');
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 4000);
+    }
+</script>
+
+</body>
+</html>

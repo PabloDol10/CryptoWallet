@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/pablodol/CryptoWallet/CryptoWallet/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "obj/Debug/net7.0/staticwebassets/msbuild.CryptoWallet.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net7.0/staticwebassets/msbuild.build.CryptoWallet.props",
+      "PackagePath": "build\\CryptoWallet.props"
+    },
+    {
+      "Id": "obj/Debug/net7.0/staticwebassets/msbuild.buildMultiTargeting.CryptoWallet.props",
+      "PackagePath": "buildMultiTargeting\\CryptoWallet.props"
+    },
+    {
+      "Id": "obj/Debug/net7.0/staticwebassets/msbuild.buildTransitive.CryptoWallet.props",
+      "PackagePath": "buildTransitive\\CryptoWallet.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
