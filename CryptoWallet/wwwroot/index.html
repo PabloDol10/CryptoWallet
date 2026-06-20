@@ -38,11 +38,30 @@
 </head>
 <body>
 
+<div id="page-login" style="display:flex; justify-content:center; align-items:center; height:100vh;">
+    <div style="background:#16213e; padding:40px; border-radius:8px; width:300px;">
+        <h2 style="color:#e94560; margin-bottom:20px;">CryptoWallet</h2>
+        <div class="form-group">
+            <label>Usuario</label>
+            <input type="text" id="login-usuario">
+        </div>
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="login-password">
+        </div>
+        <button class="btn" onclick="login()">Ingresar</button>
+        <div id="msg-login" class="mensaje" style="display:none"></div>
+    </div>
+</div>
+
 <nav>
     <h1>💰 CryptoWallet</h1>
     <button onclick="mostrarPagina('transaccion')" class="active" id="btn-transaccion">Nueva Transacción</button>
     <button onclick="mostrarPagina('historial')" id="btn-historial">Historial</button>
     <button onclick="mostrarPagina('analisis')" id="btn-analisis">Análisis</button>
+    <button onclick="mostrarPagina('deposito')">Agregar dinero</button>
+    <span id="saldo-display" style="color:#e94560; font-weight:bold;">Saldo: $0</span>
+    <button onclick="logout()">Cerrar sesión</button>
 </nav>
 
 <div class="page active" id="page-transaccion">
@@ -96,6 +115,16 @@
     <div id="cartera-contenido"></div>
 </div>
 
+<div class="page" id="page-deposito">
+    <h2>Agregar Dinero</h2>
+    <div class="form-group">
+        <label>Monto en pesos</label>
+        <input type="number" id="deposito-monto" placeholder="Ej: 10000">
+    </div>
+    <button class="btn" onclick="agregarDinero()">Agregar</button>
+    <div id="msg-deposito" class="mensaje" style="display:none"></div>
+</div>
+
 <div class="modal" id="modal-borrar">
     <div class="modal-box">
         <p>¿Estás seguro que querés borrar esta transacción?</p>
@@ -143,8 +172,10 @@
 
 <script>
     const API = 'http://localhost:5063';
+    document.querySelector('nav').style.display = 'none';
     let idABorrar = null;
     let idEditando = null;
+    let saldo = 0;
 
     function mostrarPagina(nombre) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -307,6 +338,45 @@
         document.getElementById('modal-editar').classList.remove('active');
         idEditando = null;
     }
+
+    function login() {
+    const usuario = document.getElementById('login-usuario').value;
+    const password = document.getElementById('login-password').value;
+    const msg = document.getElementById('msg-login');
+
+    if (!usuario || !password) {
+        mostrarMensaje(msg, 'Ingresá usuario y contraseña.', false);
+        return;
+    }
+
+    document.getElementById('page-login').style.display = 'none';
+    document.querySelector('nav').style.display = 'flex';
+    mostrarPagina('transaccion');
+}
+
+    function logout() {
+    document.getElementById('page-login').style.display = 'flex';
+    document.querySelector('nav').style.display = 'none';
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('login-usuario').value = '';
+    document.getElementById('login-password').value = '';
+    }
+
+    function agregarDinero() {
+    const monto = parseFloat(document.getElementById('deposito-monto').value);
+    const msg = document.getElementById('msg-deposito');
+
+    if (!monto || monto <= 0) {
+        mostrarMensaje(msg, 'Ingresá un monto mayor a 0.', false);
+        return;
+    }
+
+    saldo += monto;
+    document.getElementById('saldo-display').textContent = `Saldo: $${saldo.toLocaleString('es-AR')}`;
+    document.getElementById('deposito-monto').value = '';
+    mostrarMensaje(msg, `Se agregaron $${monto.toLocaleString('es-AR')} correctamente.`, true);
+}
+    
 
     function mostrarMensaje(el, texto, ok) {
         el.textContent = texto;
